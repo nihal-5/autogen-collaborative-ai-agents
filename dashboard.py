@@ -13,7 +13,7 @@ from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.conditions import MaxMessageTermination
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from dotenv import load_dotenv
-from tools import search_web, execute_python_code, save_to_file
+from tools import search_web, brave_search, execute_python_code, save_to_file, get_stock_data, get_weather
 
 load_dotenv()
 
@@ -28,8 +28,8 @@ async def run_agent_system(task: str):
     researcher = AssistantAgent(
         name="Researcher",
         model_client=model,
-        tools=[search_web],
-        system_message="Research and provide concise findings. Be brief.",
+        tools=[search_web, brave_search, get_stock_data, get_weather],
+        system_message="You search for information, get stock data, weather, and provide research. Be concise.",
         reflect_on_tool_use=True
     )
     
