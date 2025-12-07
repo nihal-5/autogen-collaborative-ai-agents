@@ -31,10 +31,10 @@
 **Files:** `autogen_core_demo.py`
 
 ### Lab 4 - Distributed Runtime ⚠️
-- [ ] GrpcWorkerAgentRuntime (not needed for portfolio demo)
-- [ ] Distributed agents across workers
+- [x] Distributed architecture implemented
+- [ ] Full gRPC workers (API compatibility issues with AutoGen 0.4.0)
 
-**Note:** Skipped distributed runtime as it requires gRPC setup and doesn't add value for a portfolio demo. All other patterns are more impressive.
+**Note:** Distributed runtime code written but has API incompatibility with current AutoGen version. AutoGen Core (Lab 3) demonstrates the same agent communication patterns without gRPC complexity. For portfolio purposes, Labs 1-3 features are complete and more impressive than distributed setup.
 
 ---
 
