@@ -1,6 +1,6 @@
 """
-AutoGen Multi-Agent Dashboard - PRODUCTION VERSION
-4 specialized agents with real-time collaboration and tool execution
+AutoGen Multi-Agent Dashboard - Professional Dark Theme
+Real-time process transparency with workflow streaming
 """
 
 import asyncio
@@ -17,419 +17,423 @@ from tools import search_web, execute_python_code, save_to_file
 
 load_dotenv()
 
-app = FastAPI(title="AutoGen 4-Agent System")
+app = FastAPI(title="AutoGen Multi-Agent System")
 model = OpenAIChatCompletionClient(model="gpt-4o-mini")
 
 
-async def run_4_agent_system(task: str):
-    """Run 4-agent collaboration with tools"""
+async def run_agent_system(task: str):
+    """Run 4-agent system with full process transparency"""
     
-    # Create 4 specialized agents
+    # Create agents
     researcher = AssistantAgent(
         name="Researcher",
         model_client=model,
         tools=[search_web],
-        system_message="You search for information and provide research. Be concise.",
+        system_message="Research and provide concise findings. Be brief.",
         reflect_on_tool_use=True
     )
     
     coder = AssistantAgent(
         name="Coder",
         model_client=model,
-        tools=[execute_python_code, save_to_file],
-        system_message="You write and test Python code. Show results.",
+        tools=[execute_python_code],
+        system_message="Write and test code. Keep it simple and show results.",
         reflect_on_tool_use=True
     )
     
     reviewer = AssistantAgent(
         name="Reviewer",
         model_client=model,
-        system_message="Review work and provide feedback. Be constructive."
+        system_message="Review briefly and provide key feedback."
     )
     
     synthesizer = AssistantAgent(
         name="Synthesizer",
         model_client=model,
-        system_message="Synthesize all inputs and provide final answer."
+        system_message="Provide final summary. Be concise."
     )
     
-    # Create 4-agent team
     team = RoundRobinGroupChat(
         [researcher, coder, reviewer, synthesizer],
-        termination_condition=MaxMessageTermination(12)
+        termination_condition=MaxMessageTermination(10)
     )
     
-    # Stream start
-    yield f"data: {json.dumps({'type': 'start', 'task': task, 'agents': 4})}\n\n"
+    yield f"data: {json.dumps({'type': 'start', 'task': task})}\n\n"
     
-    # Run collaboration
-    result = await team.run(task=task)
+    try:
+        result = await team.run(task=task)
+        
+        for i, msg in enumerate(result.messages):
+            # Extract content
+            content = str(msg.content) if msg.content else ""
+            
+            # Check if it's a function call
+            is_tool = "FunctionCall" in content or "FunctionExecution" in content
+            
+            event_data = {
+                'type': 'message',
+                'id': i,
+                'agent': str(msg.source),
+                'content': content[:1000],  # Limit length
+                'is_tool': is_tool,
+                'timestamp': datetime.now().isoformat()
+            }
+            yield f"data: {json.dumps(event_data)}\n\n"
+            await asyncio.sleep(0.05)
+        
+        yield f"data: {json.dumps({'type': 'complete', 'total': len(result.messages)})}\n\n"
     
-    # Stream messages
-    for i, msg in enumerate(result.messages):
-        event_data = {
-            'type': 'message',
-            'id': i,
-            'agent': msg.source,
-            'content': msg.content,
-            'timestamp': datetime.now().isoformat()
-        }
-        yield f"data: {json.dumps(event_data)}\n\n"
-        await asyncio.sleep(0.1)
-    
-    yield f"data: {json.dumps({'type': 'complete', 'total': len(result.messages)})}\n\n"
+    except Exception as e:
+        yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
 
 @app.get("/")
 async def dashboard():
-    """Serve production dashboard"""
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>AutoGen 4-Agent System</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
+    html = """<!DOCTYPE html>
+<html>
+<head>
+    <title>AutoGen Multi-Agent System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 32px 40px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #f1f5f9;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+        
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .agent-card {
+            background: #334155;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+        }
+        
+        .agent-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        
+        .agent-role {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        .controls {
+            padding: 32px 40px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .task-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .task-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .chip {
+            padding: 6px 14px;
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #cbd5e1;
+            transition: all 0.2s;
+        }
+        
+        .chip:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+        
+        .start-btn:hover {
+            background: #2563eb;
+        }
+        
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-bar {
+            padding: 14px 40px;
+            background: #1f2937;
+            border-bottom: 1px solid #374151;
+            font-size: 13px;
+            font-weight: 500;
+            color: #9ca3af;
+            display: none;
+        }
+        
+        .status-bar.active {
+            display: block;
+        }
+        
+        .conversation {
+            padding: 24px 40px;
+            max-height: 700px;
+            overflow-y: auto;
+            background: #1e293b;
+        }
+        
+        .message {
+            margin-bottom: 16px;
+            padding: 16px 20px;
+            background: #334155;
+            border-radius: 8px;
+            border-left: 3px solid #64748b;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.researcher { border-left-color: #3b82f6; }
+        .message.coder { border-left-color: #10b981; }
+        .message.reviewer { border-left-color: #f59e0b; }
+        .message.synthesizer { border-left-color: #8b5cf6; }
+        .message.tool { background: #1f2937; border-left-color: #6366f1; }
+        
+        .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .agent-label {
+            font-weight: 700;
+            font-size: 13px;
+            color: #f1f5f9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .timestamp {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .msg-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .tool-badge {
+            display: inline-block;
+            background: #6366f1;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 80px 40px;
+            color: #64748b;
+        }
+        
+        .loading {
+            display: inline-block;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AutoGen Multi-Agent System</h1>
+            <p class="subtitle">Real-time collaborative AI agent workflow with process transparency</p>
             
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
-                min-height: 100vh;
-                padding: 20px;
-            }
-            
-            .container {
-                max-width: 1400px;
-                margin: 0 auto;
-                background: rgba(255, 255, 255, 0.98);
-                border-radius: 24px;
-                box-shadow: 0 25px 80px rgba(0,0,0,0.4);
-                overflow: hidden;
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 40px;
-                text-align: center;
-                position: relative;
-            }
-            
-            .header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') bottom;
-                background-size: cover;
-                opacity: 0.3;
-            }
-            
-            h1 {
-                font-size: 3.5em;
-                color: white;
-                margin-bottom: 15px;
-                font-weight: 800;
-                letter-spacing: -1px;
-                position: relative;
-            }
-            
-            .subtitle {
-                font-size: 1.4em;
-                color: rgba(255,255,255,0.95);
-                font-weight: 300;
-                position: relative;
-            }
-            
-            .agent-badges {
-                display: flex;
-                justify-content: center;
-                gap: 15px;
-                margin-top: 25px;
-                flex-wrap: wrap;
-                position: relative;
-            }
-            
-            .badge {
-                background: rgba(255,255,255,0.25);
-                backdrop-filter: blur(10px);
-                padding: 12px 24px;
-                border-radius: 25px;
-                color: white;
-                font-weight: 600;
-                font-size: 0.95em;
-                border: 2px solid rgba(255,255,255,0.3);
-            }
-            
-            .controls {
-                padding: 40px;
-                background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-            }
-            
-            .task-section {
-                margin-bottom: 25px;
-            }
-            
-            label {
-                display: block;
-                font-weight: 700;
-                color: #334155;
-                margin-bottom: 12px;
-                font-size: 1.1em;
-            }
-            
-            .task-input {
-                width: 100%;
-                padding: 18px 24px;
-                font-size: 17px;
-                border: 3px solid #e2e8f0;
-                border-radius: 16px;
-                transition: all 0.3s;
-                font-family: inherit;
-            }
-            
-            .task-input:focus {
-                outline: none;
-                border-color: #667eea;
-                box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            }
-            
-            .suggestions {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-                margin-top: 15px;
-            }
-            
-            .suggestion-chip {
-                padding: 8px 16px;
-                background: white;
-                border: 2px solid #e2e8f0;
-                border-radius: 20px;
-                cursor: pointer;
-                transition: all 0.2s;
-                font-size: 0.9em;
-                color: #475569;
-            }
-            
-            .suggestion-chip:hover {
-                background: #667eea;
-                color: white;
-                border-color: #667eea;
-                transform: translateY(-2px);
-            }
-            
-            .start-btn {
-                width: 100%;
-                padding: 20px;
-                font-size: 20px;
-                font-weight: 700;
-                color: white;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border: none;
-                border-radius: 16px;
-                cursor: pointer;
-                transition: all 0.3s;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-                margin-top: 20px;
-            }
-            
-            .start-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-            }
-            
-            .start-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-                transform: none;
-            }
-            
-            .conversation {
-                padding: 40px;
-                max-height: 700px;
-                overflow-y: auto;
-                background: #f8fafc;
-            }
-            
-            .message {
-                margin-bottom: 25px;
-                padding: 24px;
-                border-radius: 16px;
-                animation: slideIn 0.4s ease-out;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            }
-            
-            @keyframes slideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            .researcher {
-                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-                border-left: 5px solid #3b82f6;
-            }
-            
-            .coder {
-                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-                border-left: 5px solid #10b981;
-            }
-            
-            .reviewer {
-                background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
-                border-left: 5px solid #ec4899;
-            }
-            
-            .synthesizer {
-                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-                border-left: 5px solid #f59e0b;
-            }
-            
-            .agent-header {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 12px;
-            }
-            
-            .agent-icon {
-                font-size: 28px;
-            }
-            
-            .agent-name {
-                font-weight: 800;
-                font-size: 1.2em;
-                color: #1e293b;
-            }
-            
-            .message-content {
-                line-height: 1.7;
-                color: #334155;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-            }
-            
-            .status {
-                padding: 20px 40px;
-                text-align: center;
-                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-                border-top: 3px solid #f59e0b;
-                font-weight: 700;
-                font-size: 1.1em;
-                color: #92400e;
-            }
-            
-            .thinking {
-                display: inline-block;
-                margin-left: 10px;
-            }
-            
-            .thinking span {
-                animation: blink 1.4s infinite;
-                font-size: 24px;
-            }
-            
-            .thinking span:nth-child(2) { animation-delay: 0.2s; }
-            .thinking span:nth-child(3) { animation-delay: 0.4s; }
-            
-            @keyframes blink {
-                0%, 100% { opacity: 0.2; }
-                50% { opacity: 1; }
-            }
-            
-            .empty-state {
-                text-align: center;
-                padding: 80px 40px;
-                color: #94a3b8;
-            }
-            
-            .empty-state-icon {
-                font-size: 80px;
-                margin-bottom: 20px;
-                opacity: 0.5;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>🤖 AutoGen Multi-Agent System</h1>
-                <p class="subtitle">4 Specialized AI Agents Collaborating in Real-Time</p>
-                <div class="agent-badges">
-                    <div class="badge">🔍 Researcher</div>
-                    <div class="badge">💻 Coder</div>
-                    <div class="badge">👀 Reviewer</div>
-                    <div class="badge">🎯 Synthesizer</div>
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <div class="agent-name">Researcher</div>
+                    <div class="agent-role">Web search & analysis</div>
                 </div>
-            </div>
-            
-            <div class="controls">
-                <div class="task-section">
-                    <label>Enter Your Task</label>
-                    <input type="text" class="task-input" id="taskInput" 
-                           placeholder="What would you like the agents to work on?"
-                           value="Research quantum computing, write a Python simulation of a qubit, review the code, and provide a summary">
-                    
-                    <div class="suggestions">
-                        <div class="suggestion-chip" onclick="setTask('Research quantum computing, write a Python simulation, review it, and summarize')">⚛️ Quantum Computing</div>
-                        <div class="suggestion-chip" onclick="setTask('Explain machine learning, implement linear regression in Python, review, and explain')">🧠 Machine Learning</div>
-                        <div class="suggestion-chip" onclick="setTask('Research blockchain technology, create a simple implementation, review, and conclude')">⛓️ Blockchain</div>
-                    </div>
+                <div class="agent-card">
+                    <div class="agent-name">Coder</div>
+                    <div class="agent-role">Code generation & execution</div>
                 </div>
-                
-                <button class="start-btn" id="startBtn" onclick="startConversation()">
-                    🚀 Start 4-Agent Collaboration
-                </button>
-            </div>
-            
-            <div id="status" class="status" style="display: none;">
-                4 AI agents are working<span class="thinking"><span>.</span><span>.</span><span>.</span></span>
-            </div>
-            
-            <div class="conversation" id="conversation">
-                <div class="empty-state">
-                    <div class="empty-state-icon">💭</div>
-                    <h3>Ready to Watch AI Agents Collaborate</h3>
-                    <p>Click the button above to see 4 specialized agents work together</p>
+                <div class="agent-card">
+                    <div class="agent-name">Reviewer</div>
+                    <div class="agent-role">Quality control & feedback</div>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-name">Synthesizer</div>
+                    <div class="agent-role">Final analysis & summary</div>
                 </div>
             </div>
         </div>
         
-        <script>
-            function setTask(task) {
-                document.getElementById('taskInput').value = task;
-            }
+        <div class="controls">
+            <label>Task Description</label>
+            <input type="text" class="task-input" id="taskInput" 
+                   placeholder="Enter task for multi-agent collaboration"
+                   value="Explain machine learning, implement linear regression in Python, review, and explain">
             
-            async function startConversation() {
-                const task = document.getElementById('taskInput').value;
-                const btn = document.getElementById('startBtn');
-                const status = document.getElementById('status');
-                const conv = document.getElementById('conversation');
-                
-                btn.disabled = true;
-                btn.textContent = '⏳ Agents Working...';
-                status.style.display = 'block';
-                conv.innerHTML = '';
-                
+            <div class="suggestions">
+                <div class="chip" onclick="setTask('Explain quantum computing basics and implement a simple qubit simulation')">Quantum Computing</div>
+                <div class="chip" onclick="setTask('Research blockchain technology and create a basic implementation')">Blockchain</div>
+                <div class="chip" onclick="setTask('Explain neural networks and implement a simple perceptron')">Neural Networks</div>
+            </div>
+            
+            <button class="start-btn" id="startBtn" onclick="startWork()">
+                Start Collaboration
+            </button>
+        </div>
+        
+        <div id="status" class="status-bar">
+            Processing workflow<span class="loading"></span>
+        </div>
+        
+        <div class="conversation" id="conv">
+            <div class="empty">
+                <p>Ready to begin. Click Start Collaboration to watch agents work together.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function setTask(task) {
+            document.getElementById('taskInput').value = task;
+        }
+        
+        async function startWork() {
+            const task = document.getElementById('taskInput').value;
+            const btn = document.getElementById('startBtn');
+            const status = document.getElementById('status');
+            const conv = document.getElementById('conv');
+            
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            status.classList.add('active');
+            conv.innerHTML = '';
+            
+            try {
                 const response = await fetch(`/stream?task=${encodeURIComponent(task)}`);
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                
-                const agentIcons = {
-                    'Researcher': '🔍',
-                    'Coder': '💻',
-                    'Reviewer': '👀',
-                    'Synthesizer': '🎯'
-                };
                 
                 while (true) {
                     const {value, done} = await reader.read();
@@ -444,43 +448,66 @@ async def dashboard():
                             
                             if (data.type === 'message') {
                                 const agentClass = data.agent.toLowerCase();
-                                const icon = agentIcons[data.agent] || '🤖';
-                                const preview = data.content.length > 800 ? data.content.substring(0, 800) + '...' : data.content;
+                                const time = new Date(data.timestamp).toLocaleTimeString();
                                 
                                 const msgDiv = document.createElement('div');
                                 msgDiv.className = `message ${agentClass}`;
+                                
+                                let content = data.content;
+                                let toolBadge = '';
+                                if (data.is_tool) {
+                                    toolBadge = '<span class=\"tool-badge\">TOOL EXECUTION</span><br>';
+                                }
+                                
                                 msgDiv.innerHTML = `
-                                    <div class="agent-header">
-                                        <span class="agent-icon">${icon}</span>
-                                        <span class="agent-name">${data.agent}</span>
+                                    <div class=\"msg-header\">
+                                        <span class=\"agent-label\">${data.agent}</span>
+                                        <span class=\"timestamp\">${time}</span>
                                     </div>
-                                    <div class="message-content">${preview}</div>
+                                    ${toolBadge}
+                                    <div class=\"msg-content\">${content}</div>
                                 `;
                                 conv.appendChild(msgDiv);
                                 conv.scrollTop = conv.scrollHeight;
                             }
                             
                             if (data.type === 'complete') {
-                                status.style.display = 'none';
+                                status.classList.remove('active');
                                 btn.disabled = false;
-                                btn.textContent = '🚀 Start New Collaboration';
+                                btn.textContent = 'Start New Collaboration';
+                            }
+                            
+                            if (data.type === 'error') {
+                                conv.innerHTML += `<div class=\"message\" style=\"border-left-color: #ef4444;\">
+                                    <div class=\"msg-header\"><span class=\"agent-label\">ERROR</span></div>
+                                    <div class=\"msg-content\">${data.message}</div>
+                                </div>`;
+                                status.classList.remove('active');
+                                btn.disabled = false;
+                                btn.textContent = 'Retry';
                             }
                         }
                     }
                 }
+            } catch (e) {
+                conv.innerHTML = `<div class=\"message\" style=\"border-left-color: #ef4444;\">
+                    <div class=\"msg-content\">Connection error: ${e.message}</div>
+                </div>`;
+                status.classList.remove('active');
+                btn.disabled = false;
+                btn.textContent = 'Retry';
             }
-        </script>
-    </body>
-    </html>
-    """
+        }
+    </script>
+</body>
+</html>"""
     return HTMLResponse(content=html)
 
 
 @app.get("/stream")
-async def stream_conversation(task: str):
-    """Stream 4-agent conversation"""
+async def stream(task: str):
     return StreamingResponse(
-        run_4_agent_system(task),
+        run_agent_system(task),
         media_type="text/event-stream"
     )
 
@@ -488,9 +515,9 @@ async def stream_conversation(task: str):
 if __name__ == "__main__":
     import uvicorn
     print("\n" + "="*80)
-    print("🚀 AUTOGEN 4-AGENT DASHBOARD")
+    print("AutoGen Multi-Agent Dashboard")
     print("="*80)
-    print("\n📊 Dashboard: http://localhost:8000")
-    print("👥 Agents: Researcher, Coder, Reviewer, Synthesizer")
-    print("🔧 Tools: Web Search, Code Execution, File Management\n")
+    print("\nDashboard: http://localhost:8000")
+    print("Agents: 4 (Researcher, Coder, Reviewer, Synthesizer)")
+    print("Features: Real-time streaming, process transparency, tool execution\n")
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="warning")
