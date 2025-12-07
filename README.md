@@ -1,33 +1,26 @@
-# AutoGen Multi-Agent Collaboration System
+# AutoGen Multi-Agent System
 
-A production-quality multi-agent system built with Microsoft's AutoGen framework, demonstrating real-time AI agent collaboration with web interface.
+Production-quality multi-agent collaboration system using Microsoft's AutoGen framework with professional dark theme dashboard.
 
-## What This Project Does
+## Features
 
-Watch multiple AI agents work together to solve complex tasks. Agents have specialized roles (Researcher, Coder, Reviewer, Synthesizer) and collaborate like a real team to accomplish goals.
+**4 Specialized Agents:**
+- Researcher: Web search and information gathering
+- Coder: Python code generation and execution
+- Reviewer: Quality control and feedback
+- Synthesizer: Final analysis and recommendations
 
-## Key Features
+**Production Dashboard:**
+- Professional dark theme interface
+- Real-time agent collaboration streaming
+- Process transparency with tool execution visibility
+- Timestamped messages with color-coded agents
 
-**✨ Multiple Agent Configurations**
-- 2-Agent Team: Researcher + Critic (simple collaboration)
-- 4-Agent Team: Researcher + Coder + Reviewer + Synthesizer (complex tasks)
-
-**🔧 Real Tools**
-- Web Search (Google Serper API)
-- Python Code Execution (safe sandbox)
-- File Management
-- Research & Analysis
-
-**🌐 Web Dashboard**
-- Real-time conversation streaming
-- Beautiful UI to watch agents collaborate
-- Live status updates
-
-**🎯 Production Quality**
-- Proper error handling
-- Clean architecture
-- Natural conversation flow
-- Tested end-to-end
+**Comprehensive Tools:**
+- Web search via Google Serper API
+- Python code execution (numpy, pandas, matplotlib, scikit-learn)
+- File management operations
+- Safe sandboxed environment
 
 ## Quick Start
 
@@ -39,127 +32,75 @@ pip install -r requirements.txt
 
 # Setup environment
 cp .env.example .env
-# Add your API keys to .env
+# Add your OPENAI_API_KEY and SERPER_API_KEY to .env
 
-# Run demos
-python demo.py              # 2-agent simple demo
-python multi_agent.py       # 4-agent complex demo
-python dashboard.py         # Web interface (http://localhost:8000)
+# Run dashboard
+python dashboard.py
+# Open http://localhost:8000
 ```
 
-## What Makes This Impressive
+## Available Demos
 
-**1. Real Agent Collaboration**
-Unlike simple chatbots, these agents actually work together:
-- Agents build on each other's work
-- They provide feedback and iterate
-- Each has specialized skills and tools
-- Natural team dynamics emerge
-
-**2. Multiple Patterns Demonstrated**
-- RoundRobinGroupChat (team coordination)
-- Tool-equipped agents (real actions)
-- Structured outputs (quality control)
-- Termination conditions (smart stopping)
-
-**3. Production Features**
-- Web dashboard for live monitoring
-- Error handling and retries
-- Conversation history
-- Clean, maintainable code
-
-## Agent Roles
-
-**Researcher** 🔍
-- Searches the web for information
-- Gathers data and sources
-- Provides research summaries
-
-**Coder** 💻
-- Writes Python code
-- Executes and tests code
-- Saves work to files
-
-**Reviewer** 👀
-- Reviews research and code quality
-- Provides constructive feedback
-- Ensures accuracy
-
-**Synthesizer** 🎯
-- Makes final decisions
-- Combines all inputs
-- Provides recommendations
-
-## Example Tasks
-
-Try these with the multi-agent system:
-
-```bash
-"Research quantum computing, write a simul ation, review it, and summarize"
-"Find ML algorithms, implement linear regression, review, and explain"
-"Research blockchain, create a basic implementation, review, and conclude"
-```
+1. **dashboard.py** - Professional web UI with 4-agent system (PRIMARY)
+2. **multi_agent.py** - CLI version with 4 agents and tools
+3. **demo.py** - Simple 2-agent collaboration
+4. **autogen_core_demo.py** - RoutedAgent and Runtime patterns
+5. **app.py** - Code review team example
 
 ## Technical Stack
 
-- **AutoGen 0.4.0**: Multi-agent framework
-- **FastAPI**: Web dashboard backend
-- **OpenAI GPT-4**: Agent intelligence
-- **Google Serper**: Web search
-- **Python 3.13**: Runtime
+- AutoGen 0.4.0 (multi-agent framework)
+- FastAPI (web backend)
+- Server-Sent Events (real-time streaming)
+- OpenAI GPT-4 (agent intelligence)
+- Google Serper (web search)
+- Python scientific libraries (numpy, pandas, matplotlib, scikit-learn)
 
 ## Architecture
 
 ```
-AutoGen System
-├── Agents (specialized AI roles)
-│   ├── AssistantAgent (with tools)
-│   └── Team coordination
-├── Tools (real-world actions)
-│   ├── Web search
-│   ├── Code execution
-│   └── File management
-└── Dashboard (visualization)
-    ├── Real-time streaming
-    └── Conversation display
+Dashboard (FastAPI + SSE)
+├── 4 Specialized Agents
+│   ├── Researcher (web search tool)
+│   ├── Coder (code execution tool)
+│   ├── Reviewer (quality control)
+│   └── Synthesizer (final summary)
+├── RoundRobinGroupChat (team coordination)
+├── Tool Integration (search, execute, files)
+└── Real-time Streaming (process transparency)
 ```
 
-## Why This Matters
+## Example Tasks
 
-This demonstrates:
-1. **Multi-agent collaboration** - how AI agents work together
-2. **Tool integration** - agents can take real actions
-3. **Production quality** - proper architecture, not just a demo
-4. **Team dynamics** - agents have roles and coordinate naturally
+- "Explain quantum computing and implement a qubit simulation"
+- "Research machine learning and implement linear regression"
+- "Analyze blockchain technology and create basic implementation"
 
-Unlike simple chat demos, this shows AI agents truly collaborating to solve problems - like a real development team.
+## Requirements
 
-## Lessons Learned
+- Python 3.10+
+- OpenAI API key
+- Google Serper API key (optional, for web search)
 
-**What worked well:**
-- AutoGen's RoundRobinGroupChat makes coordination simple
-- Tool integration is straightforward
-- Agents naturally develop team dynamics
+## Production Quality
 
-**Key insights:**
-- Message limits prevent infinite loops
-- Specialized agents work better than generalists
-- Visual feedback (dashboard) makes collaboration clear
+- Clean modular code structure
+- Error handling and graceful degradation
+- Professional UI/UX design
+- Comprehensive documentation
+- Tested end-to-end
 
-## Future Enhancements
+## Lab Coverage
 
-- Add more specialized agents (Tester, Designer, etc.)
-- Implement AutoGen Core for distributed agents
-- Add human-in-the-loop approval
-- Persistent conversation history
-- Voice interface integration
+- ✅ Lab 1: Basic agents and tools
+- ✅ Lab 2: Teams and termination conditions
+- ✅ Lab 3: AutoGen Core with RoutedAgent
+- ⚠️ Lab 4: Distributed runtime (code written, API compatibility issues)
 
 ## License
 
-MIT License - feel free to learn from and build upon this.
+MIT License
 
 ---
 
-**Built to showcase production-quality multi-agent AI systems.**
-
-_This project demonstrates advanced agentic AI patterns using Microsoft's AutoGen framework._
+**Production-ready multi-agent AI system with professional dashboard and comprehensive tool integration.**
