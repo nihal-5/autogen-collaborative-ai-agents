@@ -90,12 +90,6 @@ Dashboard (FastAPI + SSE)
 - Comprehensive documentation
 - Tested end-to-end
 
-## Lab Coverage
-
-- ✅ Lab 1: Basic agents and tools
-- ✅ Lab 2: Teams and termination conditions
-- ✅ Lab 3: AutoGen Core with RoutedAgent
-- ⚠️ Lab 4: Distributed runtime (code written, API compatibility issues)
 
 ## License
 
