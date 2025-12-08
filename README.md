@@ -2,6 +2,12 @@
 
 Production-quality multi-agent collaboration system using Microsoft's AutoGen framework with professional dark theme dashboard.
 
+## 🚀 Live Demo
+
+**[View in AI Portfolio Dashboard](https://unharmable-threadlike-ruth.ngrok-free.dev)** | **[Direct Access](https://unharmable-threadlike-ruth.ngrok-free.dev:8000)**
+
+> Part of **[Nihal's AI Portfolio](https://unharmable-threadlike-ruth.ngrok-free.dev)** - Unified dashboard featuring 5 cutting-edge AI services
+
 ## Features
 
 **4 Specialized Agents:**
@@ -36,7 +42,7 @@ cp .env.example .env
 
 # Run dashboard
 python dashboard.py
-# Open http://localhost:8000
+# Open https://unharmable-threadlike-ruth.ngrok-free.dev:8000
 ```
 
 ## Available Demos
